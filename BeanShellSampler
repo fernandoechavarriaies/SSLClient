@@ -1,0 +1,45 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+
+import org.apache.jmeter.util.JsseSSLManager;
+import org.apache.jmeter.util.SSLManager;
+
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
+
+int your_app_port = 1099;
+String your_app_host = "localhost";
+JsseSSLManager sslManager = (JsseSSLManager) SSLManager.getInstance();
+SSLSocketFactory sslsocketfactory = sslManager.getContext().getSocketFactory();
+SSLSocket sslsocket = (SSLSocket) sslsocketfactory.createSocket(your_app_host, your_app_port);	  
+sslsocket.startHandshake();
+
+PrintWriter out = new PrintWriter(
+                     new BufferedWriter(
+                     new OutputStreamWriter(
+                     sslsocket.getOutputStream())));
+
+out.println("20191212105500&000000000001&0004&INIT&0ABEFB86C1E41D3AAB076FFE7E454BF6&HTTP/1.0");
+out.println();
+out.flush();
+
+if (out.checkError())
+   System.out.println(
+       "SSLSocketClient:  java.io.PrintWriter error");
+
+/* read response */
+BufferedReader in = new BufferedReader(
+                       new InputStreamReader(
+                       sslsocket.getInputStream()));
+
+String inputLine;
+while ((inputLine = in.readLine()) != null)
+   System.out.println(inputLine);
+
+in.close();
+out.close();
+sslsocket.close();
